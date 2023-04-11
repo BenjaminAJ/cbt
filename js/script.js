@@ -177,6 +177,7 @@ function start(params) {
   }
 function submit(params) {
   stopCountdown();
+  questionarray[questionIndex].userAnswer =getSelectedChoice();
   score =calculateScore();
   console.log(score);
   questionCont.style.display = 'none';
