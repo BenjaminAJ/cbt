@@ -1,4 +1,5 @@
-const timer = document.getElementById("timer");
+const mins = document.getElementById("mins");
+const sec = document.getElementById("sec");
 const timeup = document.getElementById("timeup");
 const signal = document.getElementById("signal");
 const startBtn = document.getElementById("startBtn");
@@ -6,7 +7,7 @@ const ResultBtn = document.getElementById("ResultBtn");
 const questionCont = document.getElementById("questionContainer");
 const questionWrapper = document.getElementById("questionWrapper");
 const resultCont = document.getElementById("resultContainer");
-let timeobj = { sec: "" };
+let timeobj = { sec: "",min: "" };
 let questionobj = { 
     question: "How old are you?",
     answer: '12',
@@ -414,17 +415,26 @@ function previous(params) {
   
 }
 function startCountdown(params) {
-  timeobj.sec = timer.value;
+  timeobj.sec =   sec.value;
+  timeobj.min =  mins.value;
   timerinterval = setInterval(() => {
-    if (timeobj.sec == 0) {
+    if (+timeobj.sec == 0 && +timeobj.min == 0) {
       clearInterval(timerinterval);
       submit();
       timeup.innerText = "*Time up";
-    } else if (timeobj.sec > 0) {
-      timeobj.sec--;
-      timer.value = timeobj.sec;
-    }
-  }, 1000);
+    } 
+    else if (+timeobj.min != 0 && (+timeobj.sec == 0 || +timeobj.sec == 1)) {
+      timeobj.min--;
+      mins.value = timeobj.min;
+      timeobj.sec = 59;
+      sec.value = timeobj.sec;
+  }
+  else if (+timeobj.min != 0 || +timeobj.sec == 59 || +timeobj.sec != 0) {
+    timeobj.sec--;
+    sec.value = timeobj.sec;
+  }
+  console.log(timeobj);
+}, 1000);
 }
 function stopCountdown(params) {
   clearInterval(timerinterval);
