@@ -2,6 +2,7 @@ const timer = document.getElementById("timer");
 const timeup = document.getElementById("timeup");
 const signal = document.getElementById("signal");
 const startBtn = document.getElementById("startBtn");
+const ResultBtn = document.getElementById("ResultBtn");
 const questionCont = document.getElementById("questionContainer");
 const questionWrapper = document.getElementById("questionWrapper");
 const resultCont = document.getElementById("resultContainer");
@@ -119,13 +120,68 @@ function start(params) {
 
   `;
 }
+  function tryAgain(params) {
+    startCountdown();
+    questionIndex = 0;
+    // localStorage.setItem('questionarray', JSON.stringify(questionarray))
+    startBtn.style.display = 'none';
+    resultCont.innerText = ''
+    signal.innerText = 'Good luck!'
+    questionWrapper.innerHTML = `
+    <div class="row"><h3>Question</h3></div>
+          <form class="mb-3">
+            <fieldset id = "questionForm">
+              <legend>${questionIndex +1}.${questionarray[questionIndex].question}</legend>
+              <div class="row">
+                <div class="col-12">
+                
+                  <input type="radio" id="optionChoice1" name="option" value="${questionarray[questionIndex].options[0]}" />
+                  <label for="optionChoice1">${questionarray[questionIndex].options[0]}</label>
+
+                </div>
+                <div class="col-12"> 
+                  <input type="radio" id="optionChoice2" name="option" value="${questionarray[questionIndex].options[1]}" />
+                  <label for="optionChoice2">${questionarray[questionIndex].options[1]}</label>
+                </div>
+
+                <div class="col-12">
+                  <input type="radio" id="optionChoice3" name="option" value="${questionarray[questionIndex].options[2]}" />
+                  <label for="optionChoice3">${questionarray[questionIndex].options[2]}</label>
+                
+                </div>
+
+                <div class="col-12">
+                  <input type="radio" id="optionChoice4" name="option" value="${questionarray[questionIndex].options[3]}" />
+                  <label for="optionChoice4">${questionarray[questionIndex].options[3]}</label>
+                
+                </div>
+
+              </div>
+            </fieldset>
+        </form>
+
+        <div class="row">
+        <div class="col-auto">
+          <button class="btn btn-secondary" onclick="previous()">Previous</button>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-secondary" onclick="next()">Next</button>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-secondary" onclick="submit()">Submit</button>
+        </div>  
+      </div>
+
+
+    `;
+  }
 function submit(params) {
   stopCountdown();
   score =calculateScore();
   console.log(score);
   questionCont.style.display = 'none';
   signal.innerText = 'Thank you.'
-  if (score > 50) {
+  if (score > (questionarray.length / 2)) {
     resultCont.innerHTML =`
     <div class="row"><h3>Congratulations!!!</h3></div>
     <div class="row"><h4>Your score is ${score}/${questionarray.length}.</h4></div>
@@ -136,9 +192,16 @@ function submit(params) {
     resultCont.innerHTML =`
     <div class="row"><h3>Better luck next time.</h3></div>
     <div class="row"><h4>Your score is ${score}/${questionarray.length}.</h4></div>
-  
+    
     `;
-  
+  resultCont.innerHTML += `
+    <div class="row">
+      <div class="col-auto">
+        <button id="ResultBtn" class="btn btn-secondary" onclick="showResult()">See result</button>
+      </div>
+
+    </div>
+  `;
   }
 }
 function getSelectedChoice() {
@@ -163,6 +226,24 @@ function getUserSelectedChoice(param) {
   for (let i = 0; i < inputs.length; i++) {
     const input = inputs[i];
     if (param == input.value) {
+      wrongFindLabelFor(input);
+      input.checked = true
+      return
+    }
+    noAnswerFindLabelFor(input);
+  }
+
+  console.log('No option selected.');
+  return null;
+}
+function getAdminSelectedChoice(param) {
+  const fieldset = document.getElementById('questionForm');
+  const inputs = fieldset.getElementsByTagName('input');
+
+  for (let i = 0; i < inputs.length; i++) {
+    const input = inputs[i];
+    if (param == input.value) {
+      rightFindLabelFor(input);
       input.checked = true
       return
     }
@@ -170,6 +251,38 @@ function getUserSelectedChoice(param) {
 
   console.log('No option selected.');
   return null;
+}
+function rightFindLabelFor(element) {
+  let idVal = element.id;
+  let labels = document.getElementsByTagName('label');
+  for (let index = 0; index < labels.length; index++) {
+    const label = labels[index];
+    if (label.htmlFor == idVal) {
+      label.innerText += '✔' ;
+    }
+    
+  }
+}
+function wrongFindLabelFor(element) {
+  let idVal = element.id;
+  let labels = document.getElementsByTagName('label');
+  for (let index = 0; index < labels.length; index++) {
+    const label = labels[index];
+    if (label.htmlFor == idVal) {
+      label.innerText += '❌' ;
+    }
+    
+  }
+}
+function noAnswerFindLabelFor(element) {
+  let idVal = element.id;
+  const fieldset = document.getElementById('questionForm');
+  let labels = fieldset.getElementsByTagName('label');
+  for (let index = 0; index < labels.length; index++) {
+    const label = labels[index];
+    label.innerText += '❌' ;
+    
+  }
 }
 function calculateScore(userAnswer) {
   score = 0;
@@ -234,7 +347,6 @@ function next(params) {
 
   `;
   let userChoice = questionarray[questionIndex].userAnswer;
-  console.log(userChoice);
   if (userChoice) {
     getUserSelectedChoice(userChoice);
   }
@@ -315,4 +427,204 @@ function startCountdown(params) {
 }
 function stopCountdown(params) {
   clearInterval(timerinterval);
+}
+
+function showResult(params) {
+  // ResultBtn.style.display = 'none';
+  questionIndex = 0;
+  console.log(questionarray[questionIndex]);
+  questionCont.style.display = 'block';
+  questionWrapper.innerHTML = `
+  <div class="row"><h3>Question</h3></div>
+        <form class="mb-3">
+          <fieldset id = "questionForm">
+            <legend>${questionIndex +1}.${questionarray[questionIndex].question}</legend>
+            <div class="row">
+              <div class="col-12">
+              
+                <input type="radio" id="optionChoice1" name="option" value="${questionarray[questionIndex].options[0]}" />
+                <label for="optionChoice1">${questionarray[questionIndex].options[0]}</label>
+
+              </div>
+              <div class="col-12"> 
+                <input type="radio" id="optionChoice2" name="option" value="${questionarray[questionIndex].options[1]}" />
+                <label for="optionChoice2">${questionarray[questionIndex].options[1]}</label>
+              </div>
+
+              <div class="col-12">
+                <input type="radio" id="optionChoice3" name="option" value="${questionarray[questionIndex].options[2]}" />
+                <label for="optionChoice3">${questionarray[questionIndex].options[2]}</label>
+              
+              </div>
+
+              <div class="col-12">
+                <input type="radio" id="optionChoice4" name="option" value="${questionarray[questionIndex].options[3]}" />
+                <label for="optionChoice4">${questionarray[questionIndex].options[3]}</label>
+              
+              </div>
+
+            </div>
+          </fieldset>
+      </form>
+
+      <div class="row">
+      <div class="col-auto">
+        <button class="btn btn-secondary" onclick="previousResult()">Previous</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-secondary" onclick="nextResult()">Next</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-secondary" onclick="tryAgain()">Try again</button>
+      </div>  
+    </div>
+
+
+  `;
+
+  let userChoice = questionarray[questionIndex].userAnswer;
+  let adminChoice = questionarray[questionIndex].answer;
+  if (userChoice == adminChoice) {
+    getAdminSelectedChoice(adminChoice)
+    
+  }
+  else{
+    if (userChoice == '') {
+      getUserSelectedChoice(userChoice);
+    }
+    
+  }
+
+}
+function nextResult(params) {
+  questionarray[questionIndex].userAnswer =getSelectedChoice();
+  if (questionIndex == questionarray.length -1) {
+    return
+  }
+  questionIndex++;
+  questionWrapper.innerHTML = `
+  <div class="row"><h3>Question</h3></div>
+        <form class="mb-3">
+          <fieldset id = "questionForm">
+            <legend>${questionIndex +1}.${questionarray[questionIndex].question}</legend>
+            <div class="row">
+              <div class="col-12">
+              
+                <input type="radio" id="optionChoice1" name="option" value="${questionarray[questionIndex].options[0]}" />
+                <label for="optionChoice1">${questionarray[questionIndex].options[0]}</label>
+
+              </div>
+              <div class="col-12"> 
+                <input type="radio" id="optionChoice2" name="option" value="${questionarray[questionIndex].options[1]}" />
+                <label for="optionChoice2">${questionarray[questionIndex].options[1]}</label>
+              </div>
+
+              <div class="col-12">
+                <input type="radio" id="optionChoice3" name="option" value="${questionarray[questionIndex].options[2]}" />
+                <label for="optionChoice3">${questionarray[questionIndex].options[2]}</label>
+              
+              </div>
+
+              <div class="col-12">
+                <input type="radio" id="optionChoice4" name="option" value="${questionarray[questionIndex].options[3]}" />
+                <label for="optionChoice4">${questionarray[questionIndex].options[3]}</label>
+              
+              </div>
+
+            </div>
+          </fieldset>
+      </form>
+
+      <div class="row">
+      <div class="col-auto">
+        <button class="btn btn-secondary" onclick="previousResult()">Previous</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-secondary" onclick="nextResult()">Next</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-secondary" onclick="tryAgain()">Try again</button>
+      </div>  
+    </div>
+
+
+  `;
+  let userChoice = questionarray[questionIndex].userAnswer;
+  let adminChoice = questionarray[questionIndex].answer;
+  if (userChoice == adminChoice) {
+    getAdminSelectedChoice(adminChoice)
+    
+  }
+  else{
+    if (userChoice == '') {
+      getUserSelectedChoice(userChoice);
+    }
+  }
+
+}
+function previousResult(params) {
+  questionarray[questionIndex].userAnswer =getSelectedChoice();
+  if (+questionIndex == 0) {
+    return
+  }
+  questionIndex--;
+  questionWrapper.innerHTML = `
+  <div class="row"><h3>Question</h3></div>
+        <form class="mb-3">
+          <fieldset id = "questionForm">
+            <legend>${questionIndex +1}.${questionarray[questionIndex].question}</legend>
+            <div class="row">
+              <div class="col-12">
+              
+                <input type="radio" id="optionChoice1" name="option" value="${questionarray[questionIndex].options[0]}" />
+                <label for="optionChoice1">${questionarray[questionIndex].options[0]}</label>
+
+              </div>
+              <div class="col-12"> 
+                <input type="radio" id="optionChoice2" name="option" value="${questionarray[questionIndex].options[1]}" />
+                <label for="optionChoice2">${questionarray[questionIndex].options[1]}</label>
+              </div>
+
+              <div class="col-12">
+                <input type="radio" id="optionChoice3" name="option" value="${questionarray[questionIndex].options[2]}" />
+                <label for="optionChoice3">${questionarray[questionIndex].options[2]}</label>
+              
+              </div>
+
+              <div class="col-12">
+                <input type="radio" id="optionChoice4" name="option" value="${questionarray[questionIndex].options[3]}" />
+                <label for="optionChoice4">${questionarray[questionIndex].options[3]}</label>
+              
+              </div>
+
+            </div>
+          </fieldset>
+      </form>
+
+      <div class="row">
+      <div class="col-auto">
+        <button class="btn btn-secondary" onclick="previousResult()">Previous</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-secondary" onclick="nextResult()">Next</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-secondary" onclick="tryAgain()">Try again</button>
+      </div>  
+    </div>
+
+
+  `;
+  let userChoice = questionarray[questionIndex].userAnswer;
+  let adminChoice = questionarray[questionIndex].answer;
+  if (userChoice == adminChoice) {
+    getAdminSelectedChoice(adminChoice);
+    
+  }
+  else{
+    if (userChoice == '') {
+      getUserSelectedChoice(userChoice);
+    }
+  }
+  
 }
